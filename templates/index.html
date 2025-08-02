@@ -1,86 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Court Case Dashboard</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Animate.css CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <style>
-    body {
-      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .glow-btn {
-      transition: all 0.3s ease-in-out;
-      background: linear-gradient(to right, #facc15, #fde047);
-    }
-    .glow-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px #facc15;
-    }
-  </style>
+  <title>Delhi HC Real Case Data</title>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center">
+<body>
+  <h1>Check Delhi High Court Case Status</h1>
+  <form id="caseForm">
+    <input type="text" name="case_type" placeholder="Case Type e.g. WP(C)" required>
+    <input type="text" name="case_number" placeholder="Case Number" required>
+    <input type="text" name="case_year" placeholder="Year" required>
+    <button type="submit">Get Real Data</button>
+  </form>
 
-  <!-- Title -->
-  <h1 class="text-5xl font-extrabold text-white mb-8 animate__animated animate__fadeInDown">
-    ⚖️ Court Case Dashboard
-  </h1>
+  <div id="result"></div>
 
-  <!-- Form Card -->
-  <div class="glass-card shadow-2xl rounded-2xl p-8 w-[380px] animate__animated animate__zoomIn text-white">
-    <form method="POST" class="flex flex-col gap-5">
-      
-      <div>
-        <label class="block font-semibold text-yellow-400">Case Type:</label>
-        <input type="text" name="case_type" required 
-          class="w-full mt-1 p-3 rounded-lg bg-black/50 border border-gray-600 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none">
-      </div>
+  <script>
+    document.getElementById('caseForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      document.getElementById('result').innerHTML = "<p>Loading real data...</p>";
+      const formData = new FormData(this);
+      const res = await fetch('/scrape', { method: 'POST', body: formData });
+      const data = await res.json();
 
-      <div>
-        <label class="block font-semibold text-yellow-400">Case Number:</label>
-        <input type="text" name="case_number" required 
-          class="w-full mt-1 p-3 rounded-lg bg-black/50 border border-gray-600 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none">
-      </div>
-
-      <div>
-        <label class="block font-semibold text-yellow-400">Filing Year:</label>
-        <input type="text" name="filing_year" required 
-          class="w-full mt-1 p-3 rounded-lg bg-black/50 border border-gray-600 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none">
-      </div>
-
-      <button type="submit" class="glow-btn text-black font-bold py-3 rounded-xl shadow-lg">
-        🔍 Fetch Case Data
-      </button>
-    </form>
-  </div>
-
-  <!-- Error Message -->
-  {% if error_message %}
-    <p class="text-red-400 font-bold mt-6 animate__animated animate__fadeInUp">{{ error_message }}</p>
-  {% endif %}
-
-  <!-- Result Section -->
-  {% if case_data %}
-  <div class="glass-card shadow-2xl rounded-2xl p-6 w-[450px] mt-10 animate__animated animate__fadeInUp text-white">
-    <h3 class="text-yellow-400 font-bold text-2xl mb-4">Case Details</h3>
-    <p><b class="text-yellow-300">Parties:</b> {{ case_data.parties }}</p>
-    <p><b class="text-yellow-300">Filing Date:</b> {{ case_data.filing_date }}</p>
-    <p><b class="text-yellow-300">Next Hearing:</b> {{ case_data.next_hearing }}</p>
-    <a href="{{ case_data.latest_order_pdf }}" target="_blank" 
-       class="inline-block mt-5 glow-btn px-5 py-2 rounded-lg text-black font-bold">
-       📄 Download Latest Order
-    </a>
-  </div>
-  {% endif %}
-
+      document.getElementById('result').innerHTML = `
+        <h3>Case Details:</h3>
+        <p><b>Petitioner:</b> ${data.petitioner}</p>
+        <p><b>Respondent:</b> ${data.respondent}</p>
+        <p><b>Filing Date:</b> ${data.filing_date}</p>
+        <p><b>Next Hearing:</b> ${data.next_hearing}</p>
+        <p><b>PDF:</b> <a href="${data.pdf_link}" target="_blank">${data.pdf_link}</a></p>
+      `;
+    });
+  </script>
 </body>
 </html>
