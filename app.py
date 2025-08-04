@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, jsonify
-from court_scraper import fetch_case_data
+from flask import Flask, render_template, jsonify
+from court_scraper import fetch_case_table
 
 app = Flask(__name__)
 
@@ -7,13 +7,9 @@ app = Flask(__name__)
 def home():
     return render_template("index.html")
 
-@app.route("/scrape", methods=["POST"])
+@app.route("/scrape")
 def scrape():
-    case_type = request.form.get("case_type")
-    case_number = request.form.get("case_number")
-    case_year = request.form.get("case_year")
-
-    data = fetch_case_data(case_type, case_number, case_year)
+    data = fetch_case_table()
     return jsonify(data)
 
 if __name__ == "__main__":
